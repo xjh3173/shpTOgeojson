@@ -4,7 +4,7 @@
     <!-- Meta -->
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>readSHP</title>
-    <link rel="stylesheet" type="text/css" href="http://113.108.141.68:8092/arcgis_js_api/library/3.18/3.18/esri/css/esri.css" />
+    <link rel="stylesheet" type="text/css" href="https://js.arcgis.com/3.18/esri/css/esri.css" />
 </head>
 <body>
 	shp上传(至少包含.shp、.dbf)：<input type="file" id="shpFile" multiple="multiple" onchange="onChange(event)">
@@ -14,7 +14,7 @@
 	<div id='map' style='width: 600px; height: 600px;'></div>
 
     <script type="text/javascript" src="./js/shapefile.js"></script>
-    <script type="text/javascript" src="http://113.108.141.68:8092/arcgis_js_api/library/3.18/3.18/init.js"></script>
+    <script type="text/javascript" src="https://js.arcgis.com/3.18/init.js"></script>
     <script type="text/javascript" src="./js/vendor/terraformer/terraformer.min.js"></script>
     <script type="text/javascript" src="./js/vendor/terraformer-arcgis-parser/terraformer-arcgis-parser.min.js"></script>
 	<script>
@@ -92,8 +92,7 @@
 
 				//do something
 				require([
-//					"js/geojsonlayer.js",           //Cross origin
-                    "http://113.108.141.68:8090/bd/SW/bak/geojsonlayer.js",
+					"js/geojsonlayer.js",           //Cross origin
 					"esri/renderers/SimpleRenderer",
 					"dojo/on",
 					"dojo/query",
