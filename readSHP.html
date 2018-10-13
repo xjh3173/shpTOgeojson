@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <!-- Meta -->
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>readSHP</title>
+    <link rel="stylesheet" type="text/css" href="http://113.108.141.68:8092/arcgis_js_api/library/3.18/3.18/esri/css/esri.css" />
+</head>
+<body>
+	shp上传(至少包含.shp、.dbf)：<input type="file" id="shpFile" multiple="multiple" onchange="onChange(event)">
+    <button id="clearAll" onclick="removeAllLayers()">清空图层</button>
+	<p id="tip" style="color: red"></p>
+
+	<div id='map' style='width: 600px; height: 600px;'></div>
+
+    <script type="text/javascript" src="./js/shapefile.js"></script>
+    <script type="text/javascript" src="http://113.108.141.68:8092/arcgis_js_api/library/3.18/3.18/init.js"></script>
+    <script type="text/javascript" src="./js/vendor/terraformer/terraformer.min.js"></script>
+    <script type="text/javascript" src="./js/vendor/terraformer-arcgis-parser/terraformer-arcgis-parser.min.js"></script>
+	<script>
+        var map = null;
+        require(["esri/map"],
+            function (Map) {
+                // 创建地图
+                map = new Map("map", {
+                    basemap: "gray",
+                    zoom: 5
+                });
+            }
+        );
+
+		//shpfile to geojson
+		function onChange(e){
+			console.time('转换用时');
+            var geoJson = {
+                features: [],
+                type: "FeatureCollection"
+            }
+			var files = e.target.files;
+			var shpFile, dbfFile, shpData, dbfData;
+			var loadStatus = false;
+			var tip = document.getElementById('tip');
+			for(var i=0;i<files.length;i++){
+				if(/\.shp$/.test(files[i].name)){
+					shpFile = files[i];
+				}else if(/\.dbf$/.test(files[i].name)){
+					dbfFile = files[i];
+				}
+			}
+			if(!shpFile){
+				tip.innerHTML = '缺少.shp文件';
+			}else if(!dbfFile){
+				tip.innerHTML = '缺少.dbf文件';
+			}
+			if(!shpFile || !dbfFile) return ;
+			tip.innerHTML = '上传中···';
+			
+			var readDbf = new FileReader();
+			var readShp = new FileReader();
+			readDbf.readAsArrayBuffer(dbfFile, 'utf-8');
+			readShp.readAsArrayBuffer(shpFile, 'utf-8');
+			readShp.onload = function () {
+				shpData = this.result;
+				loadData();
+			}
+			readDbf.onload = function () {
+				dbfData = this.result;
+				loadData();
+			}
+			
+			function loadData() {
+				if(!dbfData || !shpData || loadStatus) return ;
+				loadStatus = true;
+				shapefile.open(shpData, dbfData , { encoding: 'GBK' }).then(source => source.read().then(
+					function next(result) {
+						if (result.done) {
+							done(geoJson);
+							tip.innerHTML =  '上传成功！';
+							return;
+						}
+						var feature = result.value;
+						geoJson.features.push(feature);
+						return source.read().then(next);
+					}
+				))
+			}
+			
+			//转换完毕
+			function done(geoJson){
+				console.timeEnd('转换用时');
+				console.log(geoJson)
+
+				//do something
+				require([
+//					"js/geojsonlayer.js",           //Cross origin
+                    "http://113.108.141.68:8090/bd/SW/bak/geojsonlayer.js",
+					"esri/renderers/SimpleRenderer",
+					"dojo/on",
+					"dojo/query",
+					"dojo/dom",
+					"dojo/domReady!"],
+					function (GeoJsonLayer, SimpleRenderer, on, query, dom) {
+						if(map.loaded){
+							addGeoJsonLayer("./geoJsonData/xxx.json");
+						}
+
+						function addGeoJsonLayer(url) {
+							// 创建图层
+							var geoJsonLayer = new GeoJsonLayer({
+								data: geoJson,
+//                                url: url      //geojson url
+							});
+
+							// 缩放至图层
+							geoJsonLayer.on("update-end", function (e) {
+								map.setExtent(e.target.extent.expand(1.2));
+							});
+
+							// 添加到地图
+							map.addLayer(geoJsonLayer);
+						}
+					}
+				);
+			}
+		}
+
+		//清空图层
+        function removeAllLayers() {
+            var i, lyr, ids = map.graphicsLayerIds;
+            for (i = ids.length -1; i > -1; i--) {
+                lyr = map.getLayer(ids[i]);
+                map.removeLayer(lyr);
+            }
+            map.infoWindow.hide();
+        }
+	</script>
+ </body>
+ </html>
