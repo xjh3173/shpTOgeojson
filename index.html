@@ -12,7 +12,6 @@
 	<p id="tip" style="color: red"></p>
 
 	<div id='map' style='width: 600px; height: 600px;'></div>
-	<textarea id='textarea' rows="10" cols="120"></textarea>
 
     <script type="text/javascript" src="./js/shapefile.js"></script>
     <script type="text/javascript" src="https://js.arcgis.com/3.18/init.js"></script>
@@ -90,7 +89,6 @@
 			function done(geoJson){
 				console.timeEnd('转换用时');
 				console.log(geoJson);
-				$('#textarea').html(JSON.stringify(geoJson));
 
 				//do something
 				require([
