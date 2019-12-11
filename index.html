@@ -12,6 +12,7 @@
 	<p id="tip" style="color: red"></p>
 
 	<div id='map' style='width: 600px; height: 600px;'></div>
+	<textarea id='textarea' rows="10" cols="120"></textarea>
 
     <script type="text/javascript" src="./js/shapefile.js"></script>
     <script type="text/javascript" src="https://js.arcgis.com/3.18/init.js"></script>
@@ -88,7 +89,8 @@
 			//转换完毕
 			function done(geoJson){
 				console.timeEnd('转换用时');
-				console.log(geoJson)
+				console.log(geoJson);
+				$('#textarea').html(JSON.stringify(geoJson));
 
 				//do something
 				require([
@@ -100,14 +102,13 @@
 					"dojo/domReady!"],
 					function (GeoJsonLayer, SimpleRenderer, on, query, dom) {
 						if(map.loaded){
-							addGeoJsonLayer("./geoJsonData/xxx.json");
+							addGeoJsonLayer();
 						}
 
-						function addGeoJsonLayer(url) {
+						function addGeoJsonLayer() {
 							// 创建图层
 							var geoJsonLayer = new GeoJsonLayer({
-								data: geoJson,
-//                                url: url      //geojson url
+								data: geoJson
 							});
 
 							// 缩放至图层
